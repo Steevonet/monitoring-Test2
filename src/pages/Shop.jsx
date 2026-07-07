@@ -13,6 +13,7 @@ import { genererCommande } from '../lib/generateOrder'
 export default function Shop() {
   const [produits, setProduits] = useState([])
   const [message, setMessage] = useState('')
+  const [enCours, setEnCours] = useState(false)
 
   useEffect(() => {
     if (!supabase) return
@@ -24,6 +25,8 @@ export default function Shop() {
   }, [])
 
   async function commanderMaintenant() {
+    if (enCours) return // évite les doublons sur double-clic / clics répétés
+    setEnCours(true)
     setMessage('⏳ Commande en cours...')
     const cmd = await genererCommande('manuel')
     if (cmd) {
@@ -31,6 +34,7 @@ export default function Shop() {
     } else {
       setMessage('❌ Erreur : vérifie ta configuration Supabase.')
     }
+    setEnCours(false)
   }
 
   return (
@@ -44,13 +48,14 @@ export default function Shop() {
 
       <button
         onClick={commanderMaintenant}
+        disabled={enCours}
         style={{
           fontSize: 18, padding: '16px 24px', margin: '16px 0',
-          background: '#2563eb', color: 'white', border: 'none',
-          borderRadius: 12, cursor: 'pointer', fontWeight: 'bold',
+          background: enCours ? '#93b4f0' : '#2563eb', color: 'white', border: 'none',
+          borderRadius: 12, cursor: enCours ? 'not-allowed' : 'pointer', fontWeight: 'bold',
         }}
       >
-        🛒 Passer une commande maintenant
+        {enCours ? '⏳ Commande en cours...' : '🛒 Passer une commande maintenant'}
       </button>
 
       {message && <p style={{ fontWeight: 'bold' }}>{message}</p>}

@@ -58,17 +58,27 @@ export default function Dashboard() {
   const nbManuel = commandes.filter((c) => c.source === 'manuel').length
 
   // Commandes par tranche de temps (les 20 dernières minutes)
+  // Regroupement par date+minute (pas juste heure:minute) pour ne pas
+  // mélanger des commandes de jours différents tombées sur la même heure.
   const parMinute = {}
   commandes.forEach((c) => {
-    const m = new Date(c.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-    parMinute[m] = (parMinute[m] || 0) + 1
+    const date = new Date(c.created_at)
+    const cle = date.toISOString().slice(0, 16) // ex: "2026-07-07T17:05"
+    if (!parMinute[cle]) {
+      parMinute[cle] = {
+        cle,
+        minute: date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        nb: 0,
+      }
+    }
+    parMinute[cle].nb += 1
   })
-  const courbe = Object.entries(parMinute)
-    .map(([minute, nb]) => ({ minute, nb }))
-    .slice(0, 20).reverse()
+  const courbe = Object.values(parMinute)
+    .sort((a, b) => a.cle.localeCompare(b.cle))
+    .slice(-20)
 
   const Carte = ({ titre, valeur, sous }) => (
-    <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: 16, flex: 1 }}>
+    <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: 16, flex: '1 1 220px' }}>
       <div style={{ color: '#666', fontSize: 13 }}>{titre}</div>
       <div style={{ fontSize: 28, fontWeight: 'bold' }}>{valeur}</div>
       {sous && <div style={{ color: '#999', fontSize: 12 }}>{sous}</div>}

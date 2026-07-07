@@ -25,6 +25,6 @@ VITE_SUPABASE_PUBLISHABLE_KEY=...</pre>
     )
   }
 
-  const estDashboard = window.location.pathname.startsWith('/dashboard')
+  const estDashboard = window.location.pathname.toLowerCase().startsWith('/dashboard')
   return estDashboard ? <Dashboard /> : <Shop />
 }
