@@ -1,8 +1,5 @@
 import { supabase } from './supabase'
 
-// Quelques prénoms au hasard pour les fausses commandes
-const PRENOMS = ['Léa','Hugo','Emma','Lucas','Chloé','Nathan','Manon','Tom','Jade','Louis','Inès','Sacha']
-
 function auHasard(tableau) {
   return tableau[Math.floor(Math.random() * tableau.length)]
 }
@@ -12,8 +9,10 @@ function auHasard(tableau) {
 //  La SEULE fonction qui crée une commande.
 //  - appelée par le TIMER  -> source = 'auto'
 //  - appelée par le BOUTON -> source = 'manuel'
-//  C'est le même code dans les deux cas : un seul endroit à
-//  comprendre et à maintenir.
+//  Le total et le nom client sont calculés côté SERVEUR (fonction
+//  Postgres `creer_commande`) à partir des vrais prix du catalogue :
+//  le client se contente de choisir quels produits et en quelle
+//  quantité, il ne peut plus imposer un total arbitraire.
 // =============================================================
 export async function genererCommande(source = 'auto') {
   if (!supabase) return // pas de config : on ne fait rien
@@ -27,29 +26,17 @@ export async function genererCommande(source = 'auto') {
   // 2) On choisit 1 à 3 produits au hasard
   const nbLignes = 1 + Math.floor(Math.random() * 3)
   const lignes = []
-  let total = 0
   for (let i = 0; i < nbLignes; i++) {
     const p = auHasard(produits)
     const qte = 1 + Math.floor(Math.random() * 2) // 1 ou 2
-    lignes.push({ product_id: p.id, quantite: qte, prix_unit: p.prix })
-    total += p.prix * qte
+    lignes.push({ product_id: p.id, quantite: qte })
   }
 
-  // 3) On crée la commande, puis ses lignes de détail
+  // 3) La fonction serveur valide les lignes, recalcule le total
+  // à partir des vrais prix, et crée la commande + ses lignes.
   const { data: commande, error: errCmd } = await supabase
-    .from('orders')
-    .insert({
-      total: Math.round(total * 100) / 100,
-      client_nom: auHasard(PRENOMS),
-      source, // 'auto' ou 'manuel' -> permet de colorer les pics manuels
-    })
-    .select()
-    .single()
+    .rpc('creer_commande', { p_source: source, p_lignes: lignes })
   if (errCmd || !commande) return
-
-  await supabase
-    .from('order_items')
-    .insert(lignes.map((l) => ({ ...l, order_id: commande.id })))
 
   return commande
 }
