@@ -1,4 +1,4 @@
-# 🐾 VitaPet — Projet du Module 5
+# 🐾 Vitashine — ma boutique
 
 Bienvenue ! Ce dossier contient un **faux site e-commerce** (vitamines pour chiens et chats)
 avec un **dashboard de monitoring**. Ton objectif : le mettre en ligne et observer son activité.

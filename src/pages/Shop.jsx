@@ -39,7 +39,7 @@ export default function Shop() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 24 }}>
-      <h1>VitaPet   ma boutique</h1>
+      <h1>Vitashine — ma boutique</h1>
       <p style={{ color: '#666' }}>
         Boutique de démonstration du Module 5. Clique sur le bouton ci-dessous
         pour passer une commande : elle apparaîtra <strong>en direct</strong> dans
