@@ -91,7 +91,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto', padding: 24 }}>
-      <h1>📊 Dashboard de monitoring — VitaPet</h1>
+      <h1>📊 Dashboard de monitoring — Vitashine</h1>
       <p><a href="/">← Retour à la boutique</a></p>
 
       {/* ---------- NIVEAU 1 : MÉTIER ---------- */}
